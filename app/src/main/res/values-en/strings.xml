@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">ELauncher</string>
+
     <string name="无">None</string>
     <string name="返回上一级">Back</string>
     <string name="返回主页">Home</string>
@@ -56,7 +57,7 @@
     <string name="输入法">Input methods</string>
     <string name="语言偏好设置">Language preferences</string>
     <string name="日期和时间">Date &amp; time</string>
-    <string name="设备管理器">Device manager</string>
+    <string name="设备管理器">Device admin settings</string>
 
     <string name="壁纸">Wallpaper</string>
     <string name="选择壁纸">Select</string>

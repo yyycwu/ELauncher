@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">墨水屏</string>
+
+    <string name="无">無</string>
+    <string name="返回上一级">返回</string>
+    <string name="返回主页">主頁</string>
+    <string name="全局刷新">刷新</string>
+    <string name="清理后台">加速</string>
+    <string name="wifi开关">Wi-Fi 開關</string>
+    <string name="悬浮球自杀">關閉懸浮球</string>
+    <string name="应用列表">應用程式</string>
+    <string name="截图">截圖</string>
+    <string name="取消">取消</string>
+
+    <string name="关于">關於</string>
+
+    <string name="列表设置">主頁設定</string>
+    <string name="自定义图标">自訂圖示</string>
+    <string name="不显示">關</string>
+    <string name="显示">開</string>
+    <string name="应用名称">圖示標籤</string>
+    <string name="排列方式">圖示排列</string>
+    <string name="顶部排列">頂部排列</string>
+    <string name="底部排列">底部排列</string>
+    <string name="列数">列數</string>
+    <string name="蒙版">不透明度</string>
+    <string name="WiFi图标">Wi-Fi 圖示</string>
+    <string name="清理图标">加速圖示</string>
+
+    <string name="应用管理">應用程式</string>
+    <string name="原生">系統</string>
+
+    <string name="应用自启">自動執行</string>
+    <string name="启用">啟用</string>
+    <string name="点击选取">選取</string>
+
+    <string name="赞赏">讚賞</string>
+
+    <string name="悬浮球">懸浮球</string>
+    <string name="图标">圖形</string>
+    <string name="圆点">圓形</string>
+    <string name="樱花">櫻花</string>
+    <string name="自定义">自訂</string>
+    <string name="透明">不透明度</string>
+    <string name="尺寸">尺寸</string>
+    <string name="单击">點一下</string>
+    <string name="双击">連按兩下</string>
+    <string name="长按">長按</string>
+    <string name="上滑">上滑</string>
+    <string name="下滑">下滑</string>
+    <string name="左滑">左滑</string>
+    <string name="右滑">右滑</string>
+
+    <string name="设置">桌面設定</string>
+    <string name="壁纸设置">壁紙</string>
+    <string name="无障碍">無障礙</string>
+    <string name="输入法">輸入法</string>
+    <string name="语言偏好设置">語言偏好設定</string>
+    <string name="日期和时间">日期與時間</string>
+    <string name="设备管理器">裝置管理員設定</string>
+
+    <string name="壁纸">壁紙</string>
+    <string name="选择壁纸">選取</string>
+    <string name="设置壁纸">儲存</string>
+
+    <string name="卸载">解除安裝</string>
+    <string name="隐藏">隱藏</string>
+    <string name="详细信息">應用程式資訊</string>
+
+    <string name="返回桌面">主頁</string>
+
+    <string name="原生应用列表">應用程式</string>
+
+    <string name="桌面设置">桌面設定</string>
+    <string name="清理后台_Boost">加速</string>
+    <string name="wifi">Wi-Fi</string>
+    <string name="wifi已关闭">Wi-Fi 關</string>
+    <string name="wifi已打开">Wi-Fi 開</string>
+</resources>
