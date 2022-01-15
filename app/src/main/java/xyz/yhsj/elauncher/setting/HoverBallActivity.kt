@@ -1,16 +1,20 @@
 package xyz.yhsj.elauncher.setting
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.provider.Settings
+import android.util.Log
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
@@ -20,8 +24,10 @@ import com.mohammedalaa.seekbar.OnRangeSeekBarChangeListener
 import com.mohammedalaa.seekbar.RangeSeekBarView
 import kotlinx.android.synthetic.main.activity_hover_ball.*
 import org.greenrobot.eventbus.EventBus
+import xyz.yhsj.elauncher.MainActivity
 import xyz.yhsj.elauncher.R
 import xyz.yhsj.elauncher.event.MessageEvent
+import xyz.yhsj.elauncher.permission.RxPermission
 import xyz.yhsj.elauncher.service.HoverBallService
 import xyz.yhsj.elauncher.utils.ActionKey
 import xyz.yhsj.elauncher.utils.FileUtils
@@ -39,6 +45,8 @@ class HoverBallActivity : AppCompatActivity() {
 
     //用于自定义选择图标
     private var selectIcon = 0
+
+    val REQUEST_MEDIA_PROJECTION = 4656
 
     lateinit var actionTitles: ArrayList<String>
 
@@ -155,7 +163,7 @@ class HoverBallActivity : AppCompatActivity() {
         setUserDrawable(userIconPath)
 
         userIcon.setOnClickListener {
-            if (userIcon.isChecked && selectIcon > 1) {
+            if (userIcon.isChecked && selectIcon > 1 || userIconPath == "") {
                 val intent = Intent(Intent.ACTION_GET_CONTENT)
                 intent.type = "image/*"
                 startActivityForResult(intent, IMAGE_PICK)
@@ -296,6 +304,17 @@ class HoverBallActivity : AppCompatActivity() {
                 }
                 SpUtil.setValue(this, spAction[actionType], checkType)
 
+                if (i == R.id.screenshot
+                    && HoverBallService.resultData == null) {
+                    //开启截图权限
+                    val mediaProjectionManager =
+                        getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                    startActivityForResult(
+                        mediaProjectionManager.createScreenCaptureIntent(),
+                        REQUEST_MEDIA_PROJECTION
+                    )
+                }
+
                 setActionName()
             }).show()
     }
@@ -342,6 +361,24 @@ class HoverBallActivity : AppCompatActivity() {
                 setUserDrawable(imgPath)
                 SpUtil.setValue(this, ActionKey.HOVER_BALL_ICON_PATH, imgPath ?: "")
                 EventBus.getDefault().post(MessageEvent(ActionKey.HOVER_BALL_ICON_INDEX))
+            }
+        }
+
+        if (requestCode == REQUEST_MEDIA_PROJECTION) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                RxPermission(this)
+                    .request(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    )
+                    .subscribe {
+                        if (it) {
+                            HoverBallService.resultData = data
+                        } else {
+                            Toast.makeText(this, "截图功能需要写入权限才能实现", Toast.LENGTH_LONG).show()
+                        }
+                    }
+            } else {
+                Toast.makeText(this, "截图功能失效，使用时请开启相关服务", Toast.LENGTH_SHORT).show()
             }
         }
     }

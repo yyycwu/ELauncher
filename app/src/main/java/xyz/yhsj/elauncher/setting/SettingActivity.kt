@@ -44,16 +44,18 @@ class SettingActivity : AppCompatActivity() {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 )
-                .subscribe({
-                    startActivity(
-                        Intent(
-                            this,
-                            WallpaperActivity::class.java
+                .subscribe {
+                    if (it) {
+                        startActivity(
+                            Intent(
+                                this,
+                                WallpaperActivity::class.java
+                            )
                         )
-                    )
-                }, {
-                    Toast.makeText(this, "壁纸功能需要读写权限才能使用", Toast.LENGTH_LONG).show()
-                })
+                    } else {
+                        Toast.makeText(this, "壁纸功能需要读写权限才能使用", Toast.LENGTH_LONG).show()
+                    }
+                }
 
         }
 

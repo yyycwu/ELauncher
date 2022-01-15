@@ -26,8 +26,10 @@ import androidx.core.content.getSystemService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import xyz.yhsj.elauncher.MainActivity
 import xyz.yhsj.elauncher.R
 import xyz.yhsj.elauncher.event.MessageEvent
+import xyz.yhsj.elauncher.setting.HoverBallActivity
 import xyz.yhsj.elauncher.utils.ActionKey
 import xyz.yhsj.elauncher.utils.FileUtils
 import xyz.yhsj.elauncher.utils.SpUtil
@@ -71,6 +73,31 @@ class HoverBallService : Service() {
             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
         createImageReader()
+
+        if (resultData == null
+            && !SpUtil.getBoolean(this, ActionKey.SHOW_SCREENSHOT_REQUEST, true)) {
+            val spAction = arrayListOf(
+                ActionKey.HOVER_BALL_CLICK,
+                ActionKey.HOVER_BALL_DOUBLE_CLICK,
+                ActionKey.HOVER_BALL_LONG_CLICK,
+                ActionKey.HOVER_BALL_UP,
+                ActionKey.HOVER_BALL_DOWN,
+                ActionKey.HOVER_BALL_LEFT,
+                ActionKey.HOVER_BALL_RIGHT
+            )
+            //检查截图功能
+            for (actionName in spAction) {
+                if (SpUtil.getInt(this, actionName, 0) == 8) {
+                    sendBroadcast(Intent(ActionKey.ACTION_SYSTEM_SCREENSHOT))
+                    val mHandler = Handler()
+                    mHandler.postDelayed({
+                        //开启桌面
+                        startActivity(Intent(this, MainActivity::class.java))
+                    }, 5000)
+                    break
+                }
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -177,6 +204,7 @@ class HoverBallService : Service() {
 
 
     private fun startScreenShot() {
+        hoverBallView.alpha = 0f //截图时隐藏圆点
         val mHandler = Handler()
         mHandler.postDelayed({ //start virtual
             startVirtual()
@@ -232,7 +260,26 @@ class HoverBallService : Service() {
     private fun startCapture() {
         val image = mImageReader.acquireLatestImage()
         if (image == null) {
-            startScreenShot()
+            if (resultData == null) {
+                //等待开启权限
+                val mHandler = Handler()
+                mHandler.postDelayed({
+                    //开启桌面
+                    startActivity(Intent(this, MainActivity::class.java))
+                    //等待结果
+                    mHandler.postDelayed({
+                        //检查结果
+                        if (resultData != null) {
+                            startScreenShot()
+                        } else {
+                            //截图失败
+                            hoverBallView.alpha = SpUtil.getInt(this, ActionKey.HOVER_BALL_ALPHA, 100) / 100.0f
+                        }
+                    }, 1000)
+                }, 5000)
+            } else {
+                startScreenShot()
+            }
         } else {
             thread {
 
@@ -258,6 +305,8 @@ class HoverBallService : Service() {
                 Log.e(">>>>>>>>", "截图地址" + path)
             }
             Toast.makeText(baseContext, "截图成功,请在ELauncher目录查看", Toast.LENGTH_SHORT).show()
+            //截图后恢复原始值
+            hoverBallView.alpha = SpUtil.getInt(this, ActionKey.HOVER_BALL_ALPHA, 100) / 100.0f
 
         }
     }

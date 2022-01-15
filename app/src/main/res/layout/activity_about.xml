@@ -55,7 +55,8 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="版本"
-            android:textSize="18dp" />
+            android:textSize="18dp"
+            android:background="@drawable/shape" />
 
         <TextView
             android:layout_width="match_parent"

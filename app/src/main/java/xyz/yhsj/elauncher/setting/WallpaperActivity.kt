@@ -1,5 +1,6 @@
 package xyz.yhsj.elauncher.setting
 
+import android.Manifest
 import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_wallpaper.*
 import xyz.yhsj.elauncher.R
+import xyz.yhsj.elauncher.permission.RxPermission
 import xyz.yhsj.elauncher.utils.FileUtils
 import java.io.IOException
 
@@ -82,14 +84,23 @@ class WallpaperActivity : AppCompatActivity() {
      * 获取壁纸
      */
     fun getSysWallPaper() {
-        // 获取壁纸管理器
-        val wallpaperManager = WallpaperManager.getInstance(this)
-        // 获取当前壁纸
-        val wallpaperDrawable = wallpaperManager.drawable
-        // 将Drawable,转成Bitmap
-        val bm = (wallpaperDrawable as BitmapDrawable).bitmap
+        RxPermission(this)
+            .request(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            .subscribe({
+                // 获取壁纸管理器
+                val wallpaperManager = WallpaperManager.getInstance(this)
+                // 获取当前壁纸
+                val wallpaperDrawable = wallpaperManager.drawable
+                // 将Drawable,转成Bitmap
+                val bm = (wallpaperDrawable as BitmapDrawable).bitmap
 
-        // 设置 背景
-        mainBg.background = (BitmapDrawable(bm))
+                // 设置 背景
+                mainBg.background = (BitmapDrawable(bm))
+            }, {
+                Toast.makeText(this, "壁纸功能需要读写权限才能实现", Toast.LENGTH_LONG).show()
+            })
     }
 }

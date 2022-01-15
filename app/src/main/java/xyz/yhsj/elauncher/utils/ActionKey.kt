@@ -22,6 +22,7 @@ object ActionKey {
     val HOVER_BALL_RIGHT = "HoverBallRight"
     val HOVER_BALL_UP = "HoverBallUp"
     val HOVER_BALL_DOWN = "HoverBallDown"
+    val SHOW_SCREENSHOT_REQUEST = "ShowScreenshotRequest"
 
     val APP_NAME_VISIBILITY = "App_Name_Visibility"
     val APP_LIST_COLUMN = "App_List_Column"

@@ -41,6 +41,7 @@ import xyz.yhsj.elauncher.event.MessageEvent
 import xyz.yhsj.elauncher.permission.RxPermission
 import xyz.yhsj.elauncher.service.HoverBallService
 import xyz.yhsj.elauncher.setting.EmptyStartActivity
+import xyz.yhsj.elauncher.setting.HoverBallActivity
 import xyz.yhsj.elauncher.setting.SettingActivity
 import xyz.yhsj.elauncher.utils.*
 import xyz.yhsj.elauncher.widget.AppDialog
@@ -66,6 +67,8 @@ class MainActivity : AppCompatActivity() {
 
     val REQUEST_MEDIA_PROJECTION = 4656
 
+    // 0: 无, 1: 返回 hover ball activity
+    var backType = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -204,13 +207,16 @@ class MainActivity : AppCompatActivity() {
 
         getSysWallpaper()
 
-        var mediaProjectionManager =
-            getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        if (SpUtil.getBoolean(this, ActionKey.SHOW_SCREENSHOT_REQUEST, true)
+            && HoverBallService.resultData == null) {
+            var mediaProjectionManager =
+                getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
-        startActivityForResult(
-            mediaProjectionManager.createScreenCaptureIntent(),
-            REQUEST_MEDIA_PROJECTION
-        )
+            startActivityForResult(
+                mediaProjectionManager.createScreenCaptureIntent(),
+                REQUEST_MEDIA_PROJECTION
+            )
+        }
 
 
     }
@@ -376,28 +382,51 @@ class MainActivity : AppCompatActivity() {
 
                 ActionKey.ACTION_SYSTEM_SCREENSHOT -> {
                     Log.e(TAG, "开启截图权限")
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                        && HoverBallService.resultData == null) {
                         var mediaProjectionManager =
                             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                         startActivityForResult(
                             mediaProjectionManager.createScreenCaptureIntent(),
                             REQUEST_MEDIA_PROJECTION
                         )
+                        backType = 1
                     }
                 }
             }
         }
     }
 
+    fun checkBackType() {
+        when (backType) {
+            1 -> {
+                startActivity(Intent(this, HoverBallActivity::class.java))
+            }
+        }
+        backType = 0
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             REQUEST_MEDIA_PROJECTION -> {
                 if (resultCode == Activity.RESULT_OK && data != null) {
-                    HoverBallService.resultData = data
+                    RxPermission(this)
+                        .request(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        )
+                        .subscribe {
+                            if (it) {
+                                HoverBallService.resultData = data
+                            } else {
+                                Toast.makeText(this, "截图功能需要写入权限才能实现", Toast.LENGTH_LONG).show()
+                            }
+                            checkBackType()
+                        }
                 } else {
-                    Toast.makeText(this, "截图功能失效，使用时请开启相关服务", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "截图功能失效，使用时请开启相关服务", Toast.LENGTH_LONG).show()
+                    SpUtil.setValue(this, ActionKey.SHOW_SCREENSHOT_REQUEST, false)
+                    checkBackType()
                 }
             }
         }
@@ -410,17 +439,27 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
-            .subscribe({
-                // 获取壁纸管理器
-                val wallpaperManager = WallpaperManager.getInstance(this)
-                // 获取当前壁纸
-                val wallpaperDrawable = wallpaperManager.drawable
-                // 将Drawable,转成Bitmap
-                val bm = (wallpaperDrawable as BitmapDrawable).bitmap
-                // 设置 背景
-                mainBg.background = (BitmapDrawable(bm))
-            }, {
-                Toast.makeText(this, "壁纸功能需要读写权限才能实现", Toast.LENGTH_LONG).show()
-            })
+            .subscribe {
+                if (it) {
+                    // 获取壁纸管理器
+                    val wallpaperManager = WallpaperManager.getInstance(this)
+                    // 获取当前壁纸
+                    val wallpaperDrawable = wallpaperManager.drawable
+                    // 将Drawable,转成Bitmap
+                    val bm = (wallpaperDrawable as BitmapDrawable).bitmap
+                    // 设置 背景
+                    mainBg.background = (BitmapDrawable(bm))
+                } else {
+                    when (backType) {
+                        0 -> {
+                            Toast.makeText(this, "壁纸功能需要读写权限才能实现", Toast.LENGTH_LONG).show()
+                        }
+                        1 -> {
+                            Toast.makeText(this, "截图功能失效，使用时请开启相关服务", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+                checkBackType()
+            }
     }
 }
